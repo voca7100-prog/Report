@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10·15 주택시장 안정화 대책과 강남구 아파트 실거래 관계 연구</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: #e0e0e0;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* CARD BASE */
+  .card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 24px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 60px 20px 40px;
+  }
+  .header h1 {
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .header .subtitle {
+    font-size: 1rem;
+    color: #a0a0c0;
+    margin-bottom: 20px;
+  }
+  .badges {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .badge {
+    background: rgba(74,144,226,0.2);
+    border: 1px solid rgba(74,144,226,0.4);
+    color: #7ab8f5;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 500;
+  }
+
+  /* SECTION TITLE */
+  .section {
+    padding: 30px 0;
+  }
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 20px;
+    padding-left: 12px;
+    border-left: 4px solid #4a90e2;
+  }
+
+  /* TIMELINE */
+  .timeline-wrapper {
+    padding: 30px 0;
+  }
+  .timeline {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+    overflow-x: auto;
+    padding: 20px 0 10px;
+    gap: 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 38px;
+    left: 5%;
+    right: 5%;
+    height: 3px;
+    background: linear-gradient(90deg, #4a90e2, #e8734a);
+    z-index: 0;
+  }
+  .timeline-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 140px;
+    position: relative;
+    z-index: 1;
+    padding: 0 8px;
+  }
+  .timeline-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #4a90e2;
+    border: 3px solid #0f0c29;
+    box-shadow: 0 0 0 3px #4a90e2;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+  }
+  .timeline-item:nth-child(3) .timeline-dot,
+  .timeline-item:nth-child(4) .timeline-dot,
+  .timeline-item:nth-child(5) .timeline-dot {
+    background: #e8734a;
+    box-shadow: 0 0 0 3px #e8734a;
+  }
+  .timeline-date {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #7ab8f5;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .timeline-item:nth-child(3) .timeline-date,
+  .timeline-item:nth-child(4) .timeline-date,
+  .timeline-item:nth-child(5) .timeline-date {
+    color: #f5a67a;
+  }
+  .timeline-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .timeline-desc {
+    font-size: 0.7rem;
+    color: #a0a0c0;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 700px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+  }
+  .kpi-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 24px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+  .kpi-label {
+    font-size: 0.85rem;
+    color: #a0a0c0;
+    margin-bottom: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .kpi-values {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .kpi-block { text-align: center; }
+  .kpi-year {
+    font-size: 0.72rem;
+    color: #a0a0c0;
+    margin-bottom: 4px;
+  }
+  .kpi-value {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1;
+  }
+  .kpi-unit {
+    font-size: 0.8rem;
+    color: #a0a0c0;
+    margin-left: 2px;
+  }
+  .kpi-change {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 8px;
+  }
+  .kpi-change.up { color: #ff6b6b; background: rgba(255,107,107,0.12); }
+  .kpi-change.down { color: #51cf66; background: rgba(81,207,102,0.12); }
+  .kpi-divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(255,255,255,0.2);
+    align-self: center;
+  }
+  .arrow-up::before { content: '▲ '; }
+  .arrow-down::before { content: '▼ '; }
+
+  /* CHART GRID */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 900px) {
+    .chart-grid { grid-template-columns: 1fr; }
+  }
+  .chart-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 24px;
+    min-height: 340px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .chart-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+  .chart-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .chart-container {
+    position: relative;
+    height: 260px;
+  }
+
+  /* POLICY 5 CARDS */
+  .policy-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 1100px) {
+    .policy-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .policy-grid { grid-template-columns: 1fr; }
+  }
+  .policy-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px 18px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .policy-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+  .policy-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4a90e2, #7b5ea7);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .policy-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .policy-desc {
+    font-size: 0.75rem;
+    color: #a0a0c0;
+    line-height: 1.5;
+  }
+
+  /* MARKET ANALYSIS */
+  .market-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 800px) {
+    .market-grid { grid-template-columns: 1fr; }
+  }
+  .market-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 24px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .market-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+  .market-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .market-card-title.before { color: #4a90e2; }
+  .market-card-title.after { color: #e8734a; }
+  .market-text {
+    font-size: 0.82rem;
+    color: #c0c0d8;
+    line-height: 1.75;
+  }
+  .findings-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .findings-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+  .findings-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffd700;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,215,0,0.2);
+  }
+  .findings-text {
+    font-size: 0.83rem;
+    color: #c0c0d8;
+    line-height: 1.8;
+    margin-bottom: 18px;
+  }
+  .effects-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .effects-list li {
+    font-size: 0.8rem;
+    color: #c0c0d8;
+    line-height: 1.6;
+    padding-left: 20px;
+    position: relative;
+  }
+  .effects-list li::before {
+    content: '·';
+    position: absolute;
+    left: 6px;
+    color: #4a90e2;
+    font-size: 1.2rem;
+    line-height: 1.2;
+  }
+
+  /* EXPERT OPINIONS */
+  .expert-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 900px) {
+    .expert-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .expert-grid { grid-template-columns: 1fr; }
+  }
+  .expert-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 18px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .expert-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+  .expert-quote {
+    font-size: 0.78rem;
+    color: #c0c0d8;
+    line-height: 1.65;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+  .expert-quote::before { content: '\201C'; color: #4a90e2; font-size: 1.1rem; }
+  .expert-quote::after { content: '\201D'; color: #4a90e2; font-size: 1.1rem; }
+  .expert-source {
+    font-size: 0.7rem;
+    color: #7ab8f5;
+    font-weight: 500;
+  }
+
+  /* TABLE */
+  .table-wrapper {
+    overflow-x: auto;
+    border-radius: 12px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  thead tr {
+    background: rgba(74,144,226,0.2);
+  }
+  thead th {
+    padding: 14px 18px;
+    text-align: left;
+    color: #7ab8f5;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: background 0.2s;
+  }
+  tbody tr:hover { background: rgba(255,255,255,0.05); }
+  tbody td {
+    padding: 14px 18px;
+    color: #e0e0e0;
+  }
+  .rank-badge {
+    display: inline-block;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4a90e2, #7b5ea7);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+    line-height: 26px;
+  }
+  .rank-badge.gold { background: linear-gradient(135deg, #ffd700, #ff8c00); }
+  .rank-badge.silver { background: linear-gradient(135deg, #c0c0c0, #808080); }
+  .rank-badge.bronze { background: linear-gradient(135deg, #cd7f32, #8b4513); }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    color: #707090;
+    font-size: 0.78rem;
+    line-height: 2;
+  }
+  footer span { color: #a0a0c0; }
+
+  /* UTILS */
+  .color-2025 { color: #4a90e2; }
+  .color-2026 { color: #e8734a; }
+  .text-gold { color: #ffd700; }
+  .mt-4 { margin-top: 16px; }
+  .gangnam-note {
+    background: rgba(232,115,74,0.1);
+    border: 1px solid rgba(232,115,74,0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  /* MAP SECTIONS */
+  .map-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 900px) { .map-grid { grid-template-columns: 1fr; } }
+  .map-container {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .map-container:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+  .map-header { padding: 18px 20px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .map-title { font-size: 0.95rem; font-weight: 700; color: #ffffff; margin-bottom: 4px; }
+  .map-subtitle { font-size: 0.73rem; color: #a0a0c0; }
+  .leaflet-map { height: 380px; width: 100%; }
+  .map-legend {
+    padding: 10px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    background: rgba(0,0,0,0.2);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.71rem; color: #b0b0c8; }
+  .legend-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+  /* Leaflet dark popup */
+  .leaflet-container { background: #1a1a2e; font-family: 'Noto Sans KR', sans-serif; }
+  .leaflet-popup-content-wrapper {
+    background: rgba(20,20,50,0.96);
+    color: #e0e0e0;
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+  }
+  .leaflet-popup-tip { background: rgba(20,20,50,0.96); }
+  .leaflet-popup-content { font-size: 0.78rem; line-height: 1.75; margin: 10px 14px; }
+  .lp-title { font-weight: 700; font-size: 0.88rem; color: #fff; margin-bottom: 6px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.15); }
+  .lp-row { display: flex; justify-content: space-between; gap: 10px; }
+  .lp-lbl { color: #9090b8; }
+  .lp-val { color: #fff; font-weight: 500; }
+  .gangnam-note-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #e8734a;
+    margin-bottom: 10px;
+  }
+  .gangnam-note-text {
+    font-size: 0.8rem;
+    color: #c0c0d8;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== HEADER ====== -->
+<div class="header">
+  <div class="container">
+    <h1>10·15 주택시장 안정화 대책과 강남구 아파트 실거래 관계 연구</h1>
+    <p class="subtitle">서울 강남구 &nbsp;·&nbsp; 2025년 1분기 vs 2026년 1분기 비교 분석</p>
+    <div class="badges">
+      <span class="badge">국토교통부 실거래가 공개시스템</span>
+      <span class="badge">공공데이터포털 (data.go.kr)</span>
+      <span class="badge">분석 기간: 2025.01 – 2026.03</span>
+      <span class="badge">분석일: 2026.06.20</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====== TIMELINE ====== -->
+<div class="container">
+  <div class="timeline-wrapper section">
+    <div class="section-title">10·15 대책 정책 타임라인</div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">2025.10.15</div>
+        <div class="timeline-label">대책 발표</div>
+        <div class="timeline-desc">부동산 관계장관회의<br>주택시장 안정화 대책 공식 발표</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">2025.10.16</div>
+        <div class="timeline-label">투기과열지구·대출규제</div>
+        <div class="timeline-desc">서울 25개구 + 경기 12곳<br>주담대 한도 차등화·스트레스 금리 적용</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">2025.10.20</div>
+        <div class="timeline-label">토지거래허가구역</div>
+        <div class="timeline-desc">서울 전역·경기 12곳 지정<br>취득 후 2년 실거주 의무 부과</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">2025.10.29</div>
+        <div class="timeline-label">전세대출 DSR 적용</div>
+        <div class="timeline-desc">전세대출에 DSR 규제 확대<br>갭투자 추가 차단 조치</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">2026.1.1</div>
+        <div class="timeline-label">위험가중치 상향</div>
+        <div class="timeline-desc">은행권 주담대 위험가중치<br>15% → 20% 상향 적용</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== KPI CARDS ====== -->
+  <div class="section">
+    <div class="section-title">분기별 핵심 지표 비교 (2025 Q1 vs 2026 Q1)</div>
+    <div class="kpi-grid">
+
+      <!-- 카드1: 매매 거래건수 -->
+      <div class="kpi-card">
+        <div class="kpi-label">매매 거래건수</div>
+        <div class="kpi-values">
+          <div class="kpi-block">
+            <div class="kpi-year color-2025">2025 Q1</div>
+            <div class="kpi-value" id="kpi-count-2025">0<span class="kpi-unit">건</span></div>
+          </div>
+          <div class="kpi-divider"></div>
+          <div class="kpi-block">
+            <div class="kpi-year color-2026">2026 Q1</div>
+            <div class="kpi-value" id="kpi-count-2026">0<span class="kpi-unit">건</span></div>
+          </div>
+          <div class="kpi-change down arrow-down" id="kpi-count-change"></div>
+        </div>
+      </div>
+
+      <!-- 카드2: 평균 매매가격 -->
+      <div class="kpi-card">
+        <div class="kpi-label">평균 매매가격</div>
+        <div class="kpi-values">
+          <div class="kpi-block">
+            <div class="kpi-year color-2025">2025 Q1</div>
+            <div class="kpi-value" id="kpi-price-2025">0<span class="kpi-unit">억원</span></div>
+          </div>
+          <div class="kpi-divider"></div>
+          <div class="kpi-block">
+            <div class="kpi-year color-2026">2026 Q1</div>
+            <div class="kpi-value" id="kpi-price-2026">0<span class="kpi-unit">억원</span></div>
+          </div>
+          <div class="kpi-change down arrow-down" id="kpi-price-change"></div>
+        </div>
+      </div>
+
+      <!-- 카드3: 전세 평균 보증금 -->
+      <div class="kpi-card">
+        <div class="kpi-label">전세 평균 보증금</div>
+        <div class="kpi-values">
+          <div class="kpi-block">
+            <div class="kpi-year color-2025">2025 Q1</div>
+            <div class="kpi-value" id="kpi-jeonse-2025">0<span class="kpi-unit">억원</span></div>
+          </div>
+          <div class="kpi-divider"></div>
+          <div class="kpi-block">
+            <div class="kpi-year color-2026">2026 Q1</div>
+            <div class="kpi-value" id="kpi-jeonse-2026">0<span class="kpi-unit">억원</span></div>
+          </div>
+          <div class="kpi-change up arrow-up" id="kpi-jeonse-change"></div>
+        </div>
+      </div>
+
+      <!-- 카드4: 전세/월세 비율 -->
+      <div class="kpi-card">
+        <div class="kpi-label">전세 비율 (전세/전체)</div>
+        <div class="kpi-values">
+          <div class="kpi-block">
+            <div class="kpi-year color-2025">2025 Q1</div>
+            <div class="kpi-value" id="kpi-ratio-2025">0<span class="kpi-unit">%</span></div>
+          </div>
+          <div class="kpi-divider"></div>
+          <div class="kpi-block">
+            <div class="kpi-year color-2026">2026 Q1</div>
+            <div class="kpi-value" id="kpi-ratio-2026">0<span class="kpi-unit">%</span></div>
+          </div>
+          <div class="kpi-change down arrow-down" id="kpi-ratio-change"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ====== CHARTS ====== -->
+  <div class="section">
+    <div class="section-title">월별 시장 동향 차트</div>
+    <div class="chart-grid">
+
+      <div class="chart-card">
+        <div class="chart-title">월별 매매 거래건수</div>
+        <div class="chart-container">
+          <canvas id="chartSaleCount"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">월별 평균 매매가격 추이 (억원)</div>
+        <div class="chart-container">
+          <canvas id="chartSalePrice"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">전세 · 월세 거래 추이 (건)</div>
+        <div class="chart-container">
+          <canvas id="chartRentType"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">전세 평균 보증금 추이 (억원)</div>
+        <div class="chart-container">
+          <canvas id="chartJeonseDeposit"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ====== POLICY 5 TASKS ====== -->
+  <div class="section">
+    <div class="section-title">정책 5대 과제</div>
+    <div class="policy-grid">
+      <div class="policy-card">
+        <div class="policy-num">①</div>
+        <div class="policy-name">주택수요 관리 강화</div>
+        <div class="policy-desc">투기과열지구·조정대상지역 서울 전 25개구 및 경기 12곳 동시 지정. 삼중 규제 체계로 수요 압력 분산.</div>
+      </div>
+      <div class="policy-card">
+        <div class="policy-num">②</div>
+        <div class="policy-name">부동산 금융규제 강화</div>
+        <div class="policy-desc">주담대 한도 차등화 (15억↓→6억, 25억↑→2억), 스트레스 DSR 3.0% 상향, 전세대출 DSR 확대 적용.</div>
+      </div>
+      <div class="policy-card">
+        <div class="policy-num">③</div>
+        <div class="policy-name">부동산 세제 합리화</div>
+        <div class="policy-desc">보유세·거래세 합리화 검토. 고령층 세금 부담 조정 및 다주택자 과세 강화를 통한 매도 유도.</div>
+      </div>
+      <div class="policy-card">
+        <div class="policy-num">④</div>
+        <div class="policy-name">부동산 거래질서 확립</div>
+        <div class="policy-desc">토지거래허가구역 서울·경기 전역 확대. 취득 후 2년 실거주 의무. 감독기구 설치 및 범부처 대응 체계 구축.</div>
+      </div>
+      <div class="policy-card">
+        <div class="policy-num">⑤</div>
+        <div class="policy-name">주택공급 확대 이행</div>
+        <div class="policy-desc">수도권 5년간 135만 호 공급 확대 계획 발표. 중장기 투기 수요 억제 신호 발신.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== MARKET ANALYSIS ====== -->
+  <div class="section">
+    <div class="section-title">시장 분석 — 정책 전후 비교</div>
+    <div class="market-grid">
+      <div class="market-card">
+        <div class="market-card-title before">정책 전 — 2025 Q1 시장 동향</div>
+        <div class="market-text">2025년 1분기(10·15 대책 발표 전) 강남구 아파트 시장은 극심한 과열 양상을 보였다. 강남구 아파트 평균 매매가는 전용 59㎡ 기준 약 20억 8천만원 수준으로 전년 대비 16.7% 급등했으며, 개포동은 22.8% 상승해 25억원을 돌파했다. 2024년 6월 이후 글로벌 금리 인하로 주담대 금리가 2%대로 내려가면서 부동산 시장으로의 자금 유입이 가속화됐고, 강남3구 전용 84㎡ 국민평형이 60억원대(서초구 래미안 원베일리)를 기록하는 등 신고가 행진이 이어졌다. 서울 전체 누적 상승률이 9.08%(2025년 연간 기준)였던 것과 달리 송파구 20.13%, 서초구 13.47%, 강남구 13.12%로 강남3구가 서울 평균을 크게 웃돌았다. 재건축 추진 단지와 역세권 중심으로 수요가 집중되며 아파트 가격 5분위 배율이 6.8배로 역대 최고치를 기록했다.</div>
+      </div>
+      <div class="market-card">
+        <div class="market-card-title after">정책 후 — 2026 Q1 시장 동향</div>
+        <div class="market-text">2026년 1분기 강남구 아파트 시장은 10·15 대책 영향으로 뚜렷한 약세를 보이며 구조적 전환기에 진입했다. 강남3구 아파트 평당 매매가는 9,067만원으로 전년 대비 68만원 하락해 13년 만(2013년 글로벌 금융위기 이후)에 처음으로 하락 전환됐다. 강남구 주간 변동률은 -0.06%, 서초구 -0.03%로 마이너스를 기록하는 반면 강북·강서·성북·동대문구 등 외곽지역은 +1.75~+1.99% 급등하는 강남-강북 디커플링(역전) 현상이 나타났다. 1분기 강남구 거래 건수는 전년 대비 21.5% 감소했으며, 토지거래허가구역 지정으로 거래량이 전반적으로 작년 대비 80% 급감하는 '거래 절벽'이 발생했다. 강남구 한강변 대단지 63.9㎡ 저층이 2025년 2월 37억 7천만원에서 2026년 3월 35억 7천만원으로 1년 만에 2억원 하락 거래됐다.</div>
+      </div>
+    </div>
+
+    <!-- FINDINGS -->
+    <div class="findings-card">
+      <div class="findings-title">핵심 발견 사항</div>
+      <div class="findings-text">10·15 대책은 서울 아파트 시장을 단기적으로 억제하는 데 부분적으로 성공했으나, 강남구에 대해서는 예상과 다른 이중적 결과를 낳았다. 대책 발표 직후인 2025년 4분기까지는 강남3구·용산의 신고가 비율이 오히려 상승(42.5% → 51.5%)하며 규제 역설 현상이 나타났고, 노도강(노원·도봉·강북)과의 상승률 격차가 극심하게 벌어졌다(최대 25배 차이). 그러나 2026년 1분기에는 토지거래허가·대출 규제 누적 효과로 강남3구 평당가가 13년 만에 처음 하락 전환됐으며, 거래량은 전년 대비 21.5% 감소하고 강북·외곽지역이 오히려 신고가를 경신하는 강남-강북 디커플링이 심화됐다. 핵심 구조적 변화는 강남 주도의 단일 상승 패턴에서 지역 분화된 복합 시장으로의 전환이며, 고령층의 세금 부담에 따른 매도 압력 증가와 30~40대의 15억원 이하 매수 선호가 시장 재편을 이끌고 있다.</div>
+      <ul class="effects-list">
+        <li>토지거래허가구역 서울 전역(25개 구) 및 경기 12개 지역 확대 지정: 지정 후 전국 아파트 거래 수가 전년 대비 80% 급감하는 거래 절벽 발생</li>
+        <li>주담대 여신한도 차등화: 유주택자는 LTV 0%로 추가 대출 전면 불가. 역설적으로 현금 자산가 중심의 강남권은 상대적으로 제한적 영향에 그쳐 '똘똘한 한 채' 수요가 강남으로 집중되는 부작용 발생</li>
+        <li>스트레스 DSR 금리 상향(1.5% → 3.0%) 및 은행권 주담대 위험가중치 상향(15% → 20%): 전반적인 실수요자 구매력 감소</li>
+        <li>투기과열지구 및 조정대상지역 서울 전역 동시 지정(삼중 규제): 강남3구·용산 신고가 거래 비율이 오히려 42.5%에서 51.5%로 9%p 상승하는 규제 역효과 관찰</li>
+        <li>수도권 5년간 135만 호 공급 확대 계획 발표: 중장기 공급 시그널로 투기 수요 억제 의도였으나 단기 효과는 제한적</li>
+      </ul>
+    </div>
+
+    <!-- GANGNAM NOTE -->
+    <div class="gangnam-note">
+      <div class="gangnam-note-title">강남구 특수 요인 분석</div>
+      <div class="gangnam-note-text">강남구는 10·15 대책 하에서도 다른 지역과 구별되는 특수 요인이 작용했다. 첫째, 현금 자산가 중심의 수요 구조로 대출 한도 축소의 직접 영향이 제한적이었다. 둘째, 재건축 기대감(개포동 등 정비사업 단지)이 가격 하방 지지력으로 작용했다. 셋째, 규제 강화 후 오히려 '확실한 한 채'를 강남 선호 단지에 집중 매수하는 '똘똘한 한 채' 심리가 강화됐다. 넷째, 2026년 들어 공급 쇼크(입주 물량 급감)가 겹치며 임대 시장 수급이 타이트해져 강남 우량 자산 보유 유인이 지속됐다. 다섯째, 성수동 등 인근 지역의 상업용 부동산 투자 급증이 강남구 주거용 아파트 시장의 투자 매력도를 상대적으로 유지시켰다.</div>
+    </div>
+
+    <!-- EXPERT OPINIONS -->
+    <div class="mt-4 section-title" style="margin-top:28px;">전문가 의견</div>
+    <div class="expert-grid">
+      <div class="expert-card">
+        <div class="expert-quote">10.15 대책은 이미 너무 늦었다. 6·27 대책 당시 한강 벨트를 중심으로 규제했다면 이렇게 가격이 오르지 않았을 것이다. 강남·서초·송파·용산은 누구나 선호하는 지역이라 규제에 관계없이 지속 상승해왔고 이번에도 오를 것이다. 2027년까지도 공급 부족으로 가격 상승이 이어질 것으로 본다.</div>
+        <div class="expert-source">권대중 한성대 경제부동산학과 석좌교수 (2025.10.22)</div>
+      </div>
+      <div class="expert-card">
+        <div class="expert-quote">대책 시행 2개월 후 강남3구·용산 신고가 거래 비율이 오히려 9%p 상승하며 51.5%에 달했다. 반면 노원구는 13.4%p, 도봉구는 12.5%p, 금천구는 11.6%p 하락해 규제가 외곽 지역을 더 강하게 누르는 역설적 결과를 낳았다.</div>
+        <div class="expert-source">시장 분석가 (2025.12, 국민일보)</div>
+      </div>
+      <div class="expert-card">
+        <div class="expert-quote">강남권과 한강변 핵심지는 이미 현금 비중이 높은 수요가 시장을 주도해 대출 한도 축소가 결정적 변수로 작용하지 않았다. 오히려 규제 이후 여러 채보다 확실한 한 채가 낫다는 인식이 강화되며 핵심지 선호가 더 뚜렷해졌다.</div>
+        <div class="expert-source">부동산 업계 관계자 (2025.12)</div>
+      </div>
+      <div class="expert-card">
+        <div class="expert-quote">2026년 1분기 강남3구 아파트 평당가 9,067만원으로 13년 만에 처음 하락 전환됐다. 다만 전문가는 초고가 아파트들이 상대적으로 덜 팔리고 저가 아파트들이 많이 팔리면서 평균을 끌어내린 통계적 착시 효과도 있다고 설명했다.</div>
+        <div class="expert-source">MBC 보도 (2026년 1분기 전수분석)</div>
+      </div>
+      <div class="expert-card">
+        <div class="expert-quote">세금 정책과 인구 구조 변화가 시장의 작동 방식 자체를 달라지게 하고 있다. 60세 이상 고령층의 세금 부담에 따른 매도 압력 증가와 30~40대의 15억원 이하 매수 선호가 맞물려 강남 주도에서 분화된 시장으로의 구조적 전환이 진행 중이다.</div>
+        <div class="expert-source">부동산 시장 전략가 (2026년 상반기)</div>
+      </div>
+      <div class="expert-card">
+        <div class="expert-quote">2026년 수도권 아파트값은 약 2% 상승 예상이나 10·15 대책을 포함한 2025년 세 차례 규제(6·27, 9·7, 10·15)가 시장 변동성을 제한하는 요인으로 작용해 강남권 가격 상승 폭은 전년 대비 큰 폭으로 둔화될 것으로 전망된다.</div>
+        <div class="expert-source">하나금융연구소 (2025.11 보고서)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TABLE ====== -->
+  <div class="section">
+    <div class="section-title">강남구 상위 거래 아파트 (2025 Q1 + 2026 Q1 합산)</div>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>순위</th>
+              <th>아파트명</th>
+              <th>총 거래건수</th>
+              <th>평균 거래가 (억원)</th>
+            </tr>
+          </thead>
+          <tbody id="apt-table-body">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ====== MAP SECTION ====== -->
+  <div class="section">
+    <div class="section-title">지도 시각화</div>
+    <div class="map-grid">
+
+      <!-- 지도1: 서울 규제 지역 현황 -->
+      <div class="map-container">
+        <div class="map-header">
+          <div class="map-title">① 10·15 대책 서울·경기 규제 지역 현황</div>
+          <div class="map-subtitle">조정대상지역·투기과열지구·토지거래허가구역 지정 현황 — 마커 클릭 시 상세 정보</div>
+        </div>
+        <div id="map-seoul" class="leaflet-map"></div>
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#ff4444;"></div>기존 규제 4개구 (강남·서초·송파·용산)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ff8c00;"></div>신규 규제 21개구 (10.16~)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ffd700;"></div>경기 12개 지역</div>
+        </div>
+      </div>
+
+      <!-- 지도2: 강남구 아파트 거래 현황 -->
+      <div class="map-container">
+        <div class="map-header">
+          <div class="map-title">② 강남구 상위 거래 아파트 분포 (2025Q1+2026Q1 합산)</div>
+          <div class="map-subtitle">원 크기 = 거래건수 비례 · 색상 = 평균거래가 구간 — 마커 클릭 시 상세 정보</div>
+        </div>
+        <div id="map-gangnam" class="leaflet-map"></div>
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#4a90e2;"></div>15억 미만</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#9b59b6;"></div>15~30억</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e74c3c;"></div>30억 이상</div>
+          <div class="legend-item"><div class="legend-dot" style="background:none;border:2px dashed #e8734a;width:13px;height:13px;border-radius:2px;"></div>토지거래허가구역</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ====== FOOTER ====== -->
+<footer>
+  <div class="container">
+    <div><span>데이터 출처:</span> 국토교통부 실거래가 공개시스템 &nbsp;|&nbsp; 공공데이터포털 (data.go.kr)</div>
+    <div><span>분석 기간:</span> 강남구 2025년 1월~3월, 2026년 1월~3월</div>
+    <div><span>분석일:</span> 2026년 6월 20일</div>
+    <div><span>정책 근거:</span> 부동산 관계장관회의 "주택시장 안정화 대책" (2025.10.15)</div>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const SALE_DATA = {
+  monthly: {
+    "202501": { count: 193, avg_price: 275972.62, median_price: 251000 },
+    "202502": { count: 192, avg_price: 267433.85, median_price: 250000 },
+    "202503": { count: 193, avg_price: 279777.82, median_price: 250000 },
+    "202601": { count: 20,  avg_price: 284780,    median_price: 267500 },
+    "202602": { count: 162, avg_price: 259929.01, median_price: 233500 },
+    "202603": { count: 178, avg_price: 245851.69, median_price: 216500 }
+  },
+  summary_2025q1: { count: 578, avg_price: 274406.81, median_price: 250000, max_price: 900000 },
+  summary_2026q1: { count: 360, avg_price: 254349.17, median_price: 224750, max_price: 990000 },
+  top_apartments: [
+    { name: "까치마을",            total_count: 28, avg_price: 134482.14 },
+    { name: "도곡렉슬",            total_count: 24, avg_price: 338866.67 },
+    { name: "래미안블레스티지",      total_count: 23, avg_price: 309978.26 },
+    { name: "성원대치2단지아파트",   total_count: 23, avg_price: 145839.13 },
+    { name: "개포래미안포레스트",    total_count: 20, avg_price: 276125    }
+  ]
+};
+
+const RENT_DATA = {
+  monthly: {
+    "202501": { jeonse_count: 87,  wolse_count: 73,  avg_jeonse_deposit: 85714.94, avg_wolse_deposit: 41095.89, avg_wolse_monthly: 206.3  },
+    "202502": { jeonse_count: 106, wolse_count: 69,  avg_jeonse_deposit: 68641.51, avg_wolse_deposit: 42028.99, avg_wolse_monthly: 156.52 },
+    "202503": { jeonse_count: 89,  wolse_count: 61,  avg_jeonse_deposit: 81547.19, avg_wolse_deposit: 36885.25, avg_wolse_monthly: 185.36 },
+    "202601": { jeonse_count: 94,  wolse_count: 106, avg_jeonse_deposit: 78547.87, avg_wolse_deposit: 40735.85, avg_wolse_monthly: 196.79 },
+    "202602": { jeonse_count: 52,  wolse_count: 78,  avg_jeonse_deposit: 67519.23, avg_wolse_deposit: 59341.67, avg_wolse_monthly: 187.44 },
+    "202603": { jeonse_count: 125, wolse_count: 75,  avg_jeonse_deposit: 89920,    avg_wolse_deposit: 35626.67, avg_wolse_monthly: 234.67 }
+  },
+  summary_2025q1: { jeonse_count: 282, wolse_count: 203, total_count: 485, avg_jeonse_deposit: 77982.62, avg_wolse_monthly: 183.08, jeonse_ratio: 58.14 },
+  summary_2026q1: { jeonse_count: 271, wolse_count: 259, total_count: 530, avg_jeonse_deposit: 81678.6,  avg_wolse_monthly: 204.94, jeonse_ratio: 51.13 }
+};
+
+// ============================================================
+// CHART LABELS & ORDER
+// ============================================================
+const LABELS = ["2025.01", "2025.02", "2025.03", "2026.01", "2026.02", "2026.03"];
+const KEYS   = ["202501",  "202502",  "202503",  "202601",  "202602",  "202603"];
+
+const BAR_COLORS = ["#4a90e2","#4a90e2","#4a90e2","#e8734a","#e8734a","#e8734a"];
+
+// ============================================================
+// COUNTDOWN ANIMATION
+// ============================================================
+function countUp(el, target, decimals, suffix) {
+  const duration = 1400;
+  const start = performance.now();
+  function update(now) {
+    const elapsed = Math.min(now - start, duration);
+    const progress = elapsed / duration;
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const current = target * ease;
+    el.textContent = current.toFixed(decimals) + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+    else el.textContent = target.toFixed(decimals) + suffix;
+  }
+  requestAnimationFrame(update);
+}
+
+// ============================================================
+// KPI CARDS
+// ============================================================
+function initKPI() {
+  const s25 = SALE_DATA.summary_2025q1;
+  const s26 = SALE_DATA.summary_2026q1;
+  const r25 = RENT_DATA.summary_2025q1;
+  const r26 = RENT_DATA.summary_2026q1;
+
+  // Count
+  const countChange = ((s26.count - s25.count) / s25.count * 100).toFixed(1);
+  countUp(document.getElementById('kpi-count-2025'), s25.count, 0, '건');
+  setTimeout(() => countUp(document.getElementById('kpi-count-2026'), s26.count, 0, '건'), 200);
+  const countEl = document.getElementById('kpi-count-change');
+  const countAbs = Math.abs(countChange);
+  countEl.textContent = (countChange < 0 ? '▼ ' : '▲ ') + countAbs + '%';
+  countEl.className = 'kpi-change ' + (countChange < 0 ? 'down' : 'up');
+
+  // Price (만원 → 억원)
+  const price25 = (s25.avg_price / 10000).toFixed(1);
+  const price26 = (s26.avg_price / 10000).toFixed(1);
+  const priceChange = ((s26.avg_price - s25.avg_price) / s25.avg_price * 100).toFixed(1);
+  countUp(document.getElementById('kpi-price-2025'), parseFloat(price25), 1, '억원');
+  setTimeout(() => countUp(document.getElementById('kpi-price-2026'), parseFloat(price26), 1, '억원'), 200);
+  const priceEl = document.getElementById('kpi-price-change');
+  const priceAbs = Math.abs(priceChange);
+  priceEl.textContent = (priceChange < 0 ? '▼ ' : '▲ ') + priceAbs + '%';
+  priceEl.className = 'kpi-change ' + (priceChange < 0 ? 'down' : 'up');
+
+  // Jeonse deposit (만원 → 억원)
+  const j25 = (r25.avg_jeonse_deposit / 10000).toFixed(2);
+  const j26 = (r26.avg_jeonse_deposit / 10000).toFixed(2);
+  const jChange = ((r26.avg_jeonse_deposit - r25.avg_jeonse_deposit) / r25.avg_jeonse_deposit * 100).toFixed(1);
+  countUp(document.getElementById('kpi-jeonse-2025'), parseFloat(j25), 2, '억원');
+  setTimeout(() => countUp(document.getElementById('kpi-jeonse-2026'), parseFloat(j26), 2, '억원'), 200);
+  const jEl = document.getElementById('kpi-jeonse-change');
+  const jAbs = Math.abs(jChange);
+  jEl.textContent = (jChange < 0 ? '▼ ' : '▲ ') + jAbs + '%';
+  jEl.className = 'kpi-change ' + (jChange >= 0 ? 'up' : 'down');
+
+  // Jeonse ratio
+  const ratio25 = r25.jeonse_ratio;
+  const ratio26 = r26.jeonse_ratio;
+  const ratioChange = (ratio26 - ratio25).toFixed(1);
+  countUp(document.getElementById('kpi-ratio-2025'), ratio25, 1, '%');
+  setTimeout(() => countUp(document.getElementById('kpi-ratio-2026'), ratio26, 1, '%'), 200);
+  const ratioEl = document.getElementById('kpi-ratio-change');
+  const ratioAbs = Math.abs(ratioChange);
+  ratioEl.textContent = (ratioChange < 0 ? '▼ ' : '▲ ') + ratioAbs + 'pp';
+  ratioEl.className = 'kpi-change ' + (ratioChange < 0 ? 'down' : 'up');
+}
+
+// ============================================================
+// CHART DEFAULT OPTIONS
+// ============================================================
+const defaultFont = { family: "'Noto Sans KR', sans-serif", size: 11 };
+
+function getDefaultOptions(yLabel) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: '#c0c0d8', font: defaultFont, boxWidth: 14 } },
+      tooltip: {
+        backgroundColor: 'rgba(15,12,41,0.92)',
+        titleColor: '#ffffff',
+        bodyColor: '#c0c0d8',
+        borderColor: 'rgba(255,255,255,0.15)',
+        borderWidth: 1,
+        titleFont: defaultFont,
+        bodyFont: defaultFont
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: '#a0a0c0', font: defaultFont },
+        grid: { color: 'rgba(255,255,255,0.05)' }
+      },
+      y: {
+        ticks: { color: '#a0a0c0', font: defaultFont },
+        grid: { color: 'rgba(255,255,255,0.08)' },
+        title: yLabel ? { display: true, text: yLabel, color: '#a0a0c0', font: defaultFont } : undefined
+      }
+    }
+  };
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+function initCharts() {
+  // Chart 1: Sale Count Bar
+  const saleCountData = KEYS.map(k => SALE_DATA.monthly[k].count);
+  new Chart(document.getElementById('chartSaleCount'), {
+    type: 'bar',
+    data: {
+      labels: LABELS,
+      datasets: [{
+        label: '거래건수 (건)',
+        data: saleCountData,
+        backgroundColor: BAR_COLORS,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: getDefaultOptions('거래건수 (건)')
+  });
+
+  // Chart 2: Avg Sale Price Line
+  const salePriceData = KEYS.map(k => parseFloat((SALE_DATA.monthly[k].avg_price / 10000).toFixed(1)));
+  new Chart(document.getElementById('chartSalePrice'), {
+    type: 'line',
+    data: {
+      labels: LABELS,
+      datasets: [{
+        label: '평균 매매가 (억원)',
+        data: salePriceData,
+        borderColor: '#ffd700',
+        backgroundColor: 'rgba(255,215,0,0.1)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#ffd700',
+        pointRadius: 5,
+        pointHoverRadius: 8,
+        borderWidth: 2
+      }]
+    },
+    options: getDefaultOptions('평균 매매가 (억원)')
+  });
+
+  // Chart 3: Stacked Bar Rent Type
+  const jeonseData = KEYS.map(k => RENT_DATA.monthly[k].jeonse_count);
+  const wolseData  = KEYS.map(k => RENT_DATA.monthly[k].wolse_count);
+  new Chart(document.getElementById('chartRentType'), {
+    type: 'bar',
+    data: {
+      labels: LABELS,
+      datasets: [
+        {
+          label: '전세',
+          data: jeonseData,
+          backgroundColor: '#4a90e2',
+          borderRadius: 4,
+          stack: 'stack0'
+        },
+        {
+          label: '월세',
+          data: wolseData,
+          backgroundColor: '#e8734a',
+          borderRadius: 4,
+          stack: 'stack0'
+        }
+      ]
+    },
+    options: {
+      ...getDefaultOptions('거래건수 (건)'),
+      plugins: {
+        ...getDefaultOptions().plugins,
+        legend: { labels: { color: '#c0c0d8', font: defaultFont, boxWidth: 14 } },
+        tooltip: getDefaultOptions().plugins ? getDefaultOptions('x').plugins.tooltip : {}
+      }
+    }
+  });
+
+  // Chart 4: Jeonse deposit line
+  const jeonseDepositData = KEYS.map(k => parseFloat((RENT_DATA.monthly[k].avg_jeonse_deposit / 10000).toFixed(2)));
+  new Chart(document.getElementById('chartJeonseDeposit'), {
+    type: 'line',
+    data: {
+      labels: LABELS,
+      datasets: [{
+        label: '전세 평균보증금 (억원)',
+        data: jeonseDepositData,
+        borderColor: '#51cf66',
+        backgroundColor: 'rgba(81,207,102,0.1)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#51cf66',
+        pointRadius: 5,
+        pointHoverRadius: 8,
+        borderWidth: 2
+      }]
+    },
+    options: getDefaultOptions('전세 평균보증금 (억원)')
+  });
+}
+
+// ============================================================
+// TABLE
+// ============================================================
+function initTable() {
+  const tbody = document.getElementById('apt-table-body');
+  const apts = SALE_DATA.top_apartments;
+  if (!apts || apts.length === 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="4" style="text-align:center;color:#707090;">데이터 없음</td>';
+    tbody.appendChild(tr);
+    return;
+  }
+  const badgeClasses = ['gold', 'silver', 'bronze', '', ''];
+  apts.forEach((apt, i) => {
+    const tr = document.createElement('tr');
+    const avgBillion = (apt.avg_price / 10000).toFixed(2);
+    const badgeCls = badgeClasses[i] ? `rank-badge ${badgeClasses[i]}` : 'rank-badge';
+    tr.innerHTML = `
+      <td><span class="${badgeCls}">${i + 1}</span></td>
+      <td style="font-weight:600;color:#ffffff;">${apt.name}</td>
+      <td>${apt.total_count.toLocaleString()}건</td>
+      <td style="color:#ffd700;font-weight:700;">${avgBillion}억원</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+// ============================================================
+// MAPS (Leaflet.js)
+// ============================================================
+function initMaps() {
+
+  // ── 공통 타일 레이어 ──────────────────────────────────────
+  function darkTile() {
+    return L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 19
+    });
+  }
+
+  // ── MAP 1: 서울·경기 규제 지역 현황 ──────────────────────
+  const seoulMap = L.map('map-seoul', { zoomControl: true, scrollWheelZoom: false })
+    .setView([37.555, 127.02], 10.6);
+  darkTile().addTo(seoulMap);
+
+  const SEOUL_DISTRICTS = [
+    {n:"강남구",   lat:37.4979, lng:127.0276, t:"기존"},
+    {n:"서초구",   lat:37.4837, lng:127.0324, t:"기존"},
+    {n:"송파구",   lat:37.5145, lng:127.1059, t:"기존"},
+    {n:"용산구",   lat:37.5321, lng:126.9903, t:"기존"},
+    {n:"강동구",   lat:37.5301, lng:127.1238, t:"신규"},
+    {n:"강북구",   lat:37.6396, lng:127.0254, t:"신규"},
+    {n:"강서구",   lat:37.5510, lng:126.8495, t:"신규"},
+    {n:"관악구",   lat:37.4782, lng:126.9515, t:"신규"},
+    {n:"광진구",   lat:37.5384, lng:127.0822, t:"신규"},
+    {n:"구로구",   lat:37.4954, lng:126.8874, t:"신규"},
+    {n:"금천구",   lat:37.4573, lng:126.8955, t:"신규"},
+    {n:"노원구",   lat:37.6547, lng:127.0566, t:"신규"},
+    {n:"도봉구",   lat:37.6688, lng:127.0471, t:"신규"},
+    {n:"동대문구", lat:37.5744, lng:127.0396, t:"신규"},
+    {n:"동작구",   lat:37.5124, lng:126.9393, t:"신규"},
+    {n:"마포구",   lat:37.5663, lng:126.9013, t:"신규"},
+    {n:"서대문구", lat:37.5791, lng:126.9367, t:"신규"},
+    {n:"성동구",   lat:37.5634, lng:127.0369, t:"신규"},
+    {n:"성북구",   lat:37.5894, lng:127.0167, t:"신규"},
+    {n:"양천구",   lat:37.5270, lng:126.8566, t:"신규"},
+    {n:"영등포구", lat:37.5264, lng:126.8963, t:"신규"},
+    {n:"은평구",   lat:37.6017, lng:126.9285, t:"신규"},
+    {n:"종로구",   lat:37.5730, lng:126.9794, t:"신규"},
+    {n:"중구",     lat:37.5641, lng:126.9979, t:"신규"},
+    {n:"중랑구",   lat:37.6063, lng:127.0928, t:"신규"},
+  ];
+
+  const GYEONGGI = [
+    {n:"과천시",    lat:37.4292, lng:127.0046},
+    {n:"광명시",    lat:37.4782, lng:126.8648},
+    {n:"성남분당구",lat:37.3802, lng:127.1178},
+    {n:"성남수정구",lat:37.4373, lng:127.1382},
+    {n:"성남중원구",lat:37.4375, lng:127.1469},
+    {n:"수원영통구",lat:37.2563, lng:127.0601},
+    {n:"수원장안구",lat:37.3110, lng:127.0086},
+    {n:"수원팔달구",lat:37.2810, lng:127.0165},
+    {n:"안양동안구",lat:37.4025, lng:126.9560},
+    {n:"용인수지구",lat:37.3232, lng:127.0964},
+    {n:"의왕시",    lat:37.3448, lng:126.9672},
+    {n:"하남시",    lat:37.5397, lng:127.2145},
+  ];
+
+  SEOUL_DISTRICTS.forEach(d => {
+    const isOld = d.t === '기존';
+    const color = isOld ? '#ff4444' : '#ff8c00';
+    L.circle([d.lat, d.lng], {
+      color: color, fillColor: color, fillOpacity: isOld ? 0.55 : 0.4,
+      weight: 2, radius: isOld ? 750 : 580
+    }).addTo(seoulMap).bindPopup(
+      '<div class="lp-title">' + d.n + '</div>' +
+      '<div class="lp-row"><span class="lp-lbl">구분</span><span class="lp-val">' + (isOld ? '기존 투기과열지구' : '신규 지정 (10·15)') + '</span></div>' +
+      '<div class="lp-row"><span class="lp-lbl">지정일</span><span class="lp-val">' + (isOld ? '기존 지정' : '2025.10.16') + '</span></div>' +
+      '<div class="lp-row"><span class="lp-lbl">적용</span><span class="lp-val">LTV·대출·세제·청약 규제</span></div>'
+    );
+  });
+
+  GYEONGGI.forEach(d => {
+    L.circle([d.lat, d.lng], {
+      color: '#ffd700', fillColor: '#ffd700', fillOpacity: 0.35, weight: 1.5, radius: 1400
+    }).addTo(seoulMap).bindPopup(
+      '<div class="lp-title">' + d.n + '</div>' +
+      '<div class="lp-row"><span class="lp-lbl">구분</span><span class="lp-val">경기 규제지역</span></div>' +
+      '<div class="lp-row"><span class="lp-lbl">지정일</span><span class="lp-val">2025.10.16</span></div>'
+    );
+  });
+
+  // ── MAP 2: 강남구 아파트 거래 현황 ──────────────────────
+  const gangnamMap = L.map('map-gangnam', { zoomControl: true, scrollWheelZoom: false })
+    .setView([37.4979, 127.0497], 13);
+  darkTile().addTo(gangnamMap);
+
+  // 동 레이블
+  const DONGS = [
+    {n:"대치동",  lat:37.4946, lng:127.0609},
+    {n:"개포동",  lat:37.4803, lng:127.0492},
+    {n:"도곡동",  lat:37.4882, lng:127.0432},
+    {n:"압구정동",lat:37.5271, lng:127.0284},
+    {n:"역삼동",  lat:37.5010, lng:127.0356},
+    {n:"청담동",  lat:37.5249, lng:127.0479},
+    {n:"삼성동",  lat:37.5145, lng:127.0632},
+    {n:"논현동",  lat:37.5134, lng:127.0268},
+    {n:"일원동",  lat:37.4821, lng:127.0798},
+  ];
+  DONGS.forEach(d => {
+    L.marker([d.lat, d.lng], {
+      icon: L.divIcon({
+        html: '<div style="color:rgba(200,210,255,0.65);font-size:10px;font-weight:600;white-space:nowrap;text-shadow:0 1px 3px #000">' + d.n + '</div>',
+        className: '', iconAnchor: [20, 8]
+      })
+    }).addTo(gangnamMap);
+  });
+
+  // 토지거래허가구역 경계 (강남구 근사 직사각형)
+  L.rectangle([[37.4576, 127.0148],[37.5347, 127.1049]], {
+    color: '#e8734a', fillColor: '#e8734a', fillOpacity: 0.04, weight: 2, dashArray: '7 4'
+  }).addTo(gangnamMap).bindPopup(
+    '<div class="lp-title">강남구 토지거래허가구역</div>' +
+    '<div class="lp-row"><span class="lp-lbl">기간</span><span class="lp-val">2025.10.20 ~ 2026.12.31</span></div>' +
+    '<div class="lp-row"><span class="lp-lbl">의무</span><span class="lp-val">취득 후 2년 실거주</span></div>' +
+    '<div class="lp-row"><span class="lp-lbl">대상</span><span class="lp-val">아파트 + 연립·다세대</span></div>'
+  );
+
+  // 상위 거래 아파트 마커
+  const APTS = [
+    {n:"까치마을",          lat:37.4835, lng:127.0502, cnt:28, avg:134482, dong:"개포동"},
+    {n:"도곡렉슬",          lat:37.4887, lng:127.0449, cnt:24, avg:338867, dong:"도곡동"},
+    {n:"래미안블레스티지",   lat:37.4768, lng:127.0498, cnt:23, avg:309978, dong:"개포동"},
+    {n:"성원대치2단지",     lat:37.4960, lng:127.0603, cnt:23, avg:145839, dong:"대치동"},
+    {n:"개포래미안포레스트", lat:37.4757, lng:127.0516, cnt:20, avg:276125, dong:"개포동"},
+  ];
+
+  function aptColor(avg) {
+    if (avg < 150000) return '#4a90e2';
+    if (avg < 300000) return '#9b59b6';
+    return '#e74c3c';
+  }
+  function priceLabel(avg) {
+    if (avg < 150000) return '15억 미만';
+    if (avg < 300000) return '15~30억';
+    return '30억 이상';
+  }
+
+  APTS.forEach(a => {
+    const color = aptColor(a.avg);
+    const avgB = (a.avg / 10000).toFixed(1);
+    L.circle([a.lat, a.lng], {
+      color: color, fillColor: color, fillOpacity: 0.7, weight: 2,
+      radius: 90 + a.cnt * 9
+    }).addTo(gangnamMap).bindPopup(
+      '<div class="lp-title">' + a.n + '</div>' +
+      '<div class="lp-row"><span class="lp-lbl">소재지</span><span class="lp-val">' + a.dong + '</span></div>' +
+      '<div class="lp-row"><span class="lp-lbl">총 거래건수</span><span class="lp-val">' + a.cnt + '건</span></div>' +
+      '<div class="lp-row"><span class="lp-lbl">평균거래가</span><span class="lp-val">' + avgB + '억원</span></div>' +
+      '<div class="lp-row"><span class="lp-lbl">가격구간</span><span class="lp-val">' + priceLabel(a.avg) + '</span></div>'
+    );
+    // 아파트명 레이블
+    L.marker([a.lat + 0.0015, a.lng], {
+      icon: L.divIcon({
+        html: '<div style="color:#fff;font-size:9.5px;font-weight:700;white-space:nowrap;text-shadow:0 1px 4px #000,0 0 8px ' + color + '">' + a.n + '</div>',
+        className: '', iconAnchor: [30, 0]
+      })
+    }).addTo(gangnamMap);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  initKPI();
+  initCharts();
+  initTable();
+  initMaps();
+});
+</script>
+</body>
+</html>
